@@ -1,0 +1,7 @@
+1->install nodejs (https://nodejs.org/en/download/)
+2->create database 'registration' and paste the database file contents onto sql query
+3->open cmd and set proxy setting if using one (set HTTP_PROXY=http://user:password@proxy.domain.com:port)
+4->open cmd go into the project folder and type npm install
+5->in same place(cmd) type node server.js
+6->open chrome and type localhost:2001(make sure proxy is disabled for local networks)
+Enjoy!

@@ -5,8 +5,21 @@
   <title>Registration system PHP and MySQL</title>
   <script src="http://code.jquery.com/jquery-latest.min.js"></script>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" >
-<style>
-    body{
+  <script src="/socket.io/socket.io.js"></script>
+  <style type="text/css">
+    #labelm{
+    
+   display:none;
+    font-size:15pt;
+    border: 0;
+    margin-bottom: 0px;
+    height:40px;
+    width:250px;
+    text-align:center;
+    background-color: transparent;
+    color: #840707;
+  }
+   body{
     margin: 0;
      width: 500px;
     height: 800px;
@@ -18,8 +31,8 @@
 }
 
 .login-box{
-    width: 320px;
-    height: 520px;
+    width: 360px;
+    height: 620px;
     background: rgba(0, 0, 0, 0.5);
     color: #fff;
     top: 50%;
@@ -52,7 +65,7 @@ h1{
     width: 100%;
     margin-bottom: 20px;
 }
-.login-box input[type="text"], input[type="password"]
+.login-box input[type="text"], input[type="password"],input[type="email"]
 {
     border: none;
     border-bottom: 1px solid #fff;
@@ -89,68 +102,65 @@ h1{
     color: #39dc79;
 }
   </style>
-
 </head>
 <body>
+   <div class="login-box">
+   
   <div class="header">
-     <div class="login-box">
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSNwH9DCM75f13HIcF0PmBnDf8o2WVrCHk6haHMCNrTlfkO_iqy" class="avatar">
-  	<h1>Register</h1>
+  	<h2>Register</h2>
+
   </div>
 	
   <form method="post" action="/register">
   	
-  
-
-  	
-  
-  	
-  	
-  	
+  	<div class="input-group">
+  	  <label>Username</label>
+  	  <input type="text" name="username" placeholder="Enter Username">
+  	</div>
+  	<div class="input-group">
+  	  <label>Email</label>
+  	  <input type="email" name="email" placeholder="Enter Email">
+  	</div>
+  	<div class="input-group">
+  	  <label>Password</label>
+  	  <input type="password" name="password_1" placeholder="Enter Password">
+  	</div>
+  	<div class="input-group">
+  	  <label>Confirm password</label>
+  	  <input type="password" name="password_2" placeholder="Confirm Password">
+  	</div>
+  	<div class="input-group">
+  	  <button type="submit" class="btn btn-primary" name="reg_user">Register</button>
+  	</div>
+  	<p>
+  		Already a member? <a class="btn btn-primary" href="/login">Sign in</a>
+  	</p>
   </form>
-</body>
-<body>
-    <div class="login-box">
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSNwH9DCM75f13HIcF0PmBnDf8o2WVrCHk6haHMCNrTlfkO_iqy" class="avatar">
-        
-            <form>
-                <div class="input-group">
-
-            <label>Username</label>
-      <input type="text" name="username" placeholder="Enter Username" >
-
-
-    </div>
-
-          <div class="input-group">
-      <label>Email</label>
-      <input type="text" name="email" placeholder="Enter Email" >
-    </div>
-
-
-            <div class="input-group">
-      <label>Password</label>
-      <input type="password" name="password_1" placeholder="Enter Password">
-    </div>
-
-          <div class="input-group">
-      <label>Confirm password</label>
-      <input type="password" name="password_2" placeholder="Confirm Password">
-    </div>
-
+  <textarea id="labelm"></textarea>
+</div>
+  <script type="text/javascript">
+    var socket=io.connect();
+    var $labelm=$('#labelm');
+    socket.on('username taken',function(data)
+    {
+      $labelm.show();
+      $labelm.val("username already exists");
       
-    <div class="input-group">
-     <a <button type="submit" class="btn btn-primary" name="reg_user">Register</button></a>
-    </div>
-  <p>
-      Already a member? <a class="btn btn-primary" href="/login">Sign in</a>
-    </p>
-            </div>
-   
-            </form>
-        
-        
-        </div>
-    
-    </body>
+    });
+    socket.on('password unmatch',function(data)
+    {
+      $labelm.show();
+      $labelm.val("passwords dont match");
+      
+    });
+    socket.on('registered',function(data)
+    {
+      console.log("hello12");
+      $labelm.show();
+      $labelm.val("registered successfully");
+      
+      
+    });
+  </script>
+</body>
 </html>

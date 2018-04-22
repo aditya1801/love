@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" >
+  <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <title>admin</title>
+  <style type="text/css">
+      
+  #mainmessage{
+    
+    font-size:15pt;
+    border: 0;
+    margin-bottom: 0px;
+    height:35px;
+    text-align:center;
+  }
+  #table
+  {
+    display:none;
+  }
+  #backbutton
+  {
+    display:none;
+  }
+   #refreshbutton
+  {
+    display:none;
+  }
+  #blockuserbutton
+  {
+    display:none;
+  }
+  #unblockuserbutton
+  {
+    display:none;
+  }
+  #viewstatsbutton
+  {
+    display:none;
+  }
+  #viewprofilebutton
+  {
+    display:none;
+  }
+  </style>
+</head>
+<body>
+  <textarea id="mainmessage" readonly ></textarea>
+  <button class ="btn btn-primary" onclick="logoutfun()">log out</button><br><br>
+  <button id="viewusers" onclick="startfun()" class ="btn btn-primary">view users</button><br><br>
+  <button id="viewallgames" onclick="viewallgamesfun()" class ="btn btn-primary">view all games</button><br><br>
+  <button id="viewleaderboard" onclick="viewleaderboardfun()" class ="btn btn-primary">view leaderboard</button><br><br>
+  <button id="playgame" onclick="playgamefun()" class ="btn btn-primary">play game</button>
+
+    
+     <button id="backbutton" onclick="backbuttonfun()" class ="btn btn-primary">back</button>
+     <button id="refreshbutton" onclick="refreshbuttonfun()" class ="btn btn-primary">refresh</button><br>
+  <table id="table" style="width:100%">
+    
+  </table>
+  <button id="blockuserbutton" onclick="blockuserbuttonfun()" class ="btn btn-primary">block user</button>
+  <button id="unblockuserbutton" onclick="unblockuserbuttonfun()" class ="btn btn-primary">unblock user</button>
+  <button id="viewstatsbutton" onclick="viewstatsbuttonfun()" class ="btn btn-primary">view stats</button>
+  <button id="viewprofilebutton" onclick="viewprofilebuttonfun()" class ="btn btn-primary">view profile</button>
+<script >
+  var socket = io.connect();
+  var username,name;
+  var $mainmessage=$('#mainmessage');
+  var $table=$('#table');
+   var $playgame=$('#playgame');
+    var $viewusers=$('#viewusers');
+    var $viewallgames=$('#viewallgames');
+  var $backbutton=$('#backbutton');
+  var $refreshbutton=$('#refreshbutton');
+   var $blockuserbutton=$('#blockuserbutton');
+   var $unblockuserbutton=$('#unblockuserbutton');
+   var $viewstatsbutton=$('#viewstatsbutton');
+    var $viewprofilebutton=$('#viewprofilebutton');
+   var $viewleaderboard=$('#viewleaderboard');
+
+  $(function(){
+          name = window.location.search.replace(/^\?/, '');
+           if(!name)
+          $.get('http://localhost:2001/username', {}, function(data){
+           
+           username=data;
+           
+           $mainmessage.val("Welcome "+username+" ");
+           console.log($mainmessage.val());
+
+            });
+           else
+           {
+             username=name;
+             $mainmessage.val("Welcome "+username+" ");
+             $playgame.hide();
+             $viewusers.hide();
+             viewusersfun();
+              
+           }
+
+           });
+  function startfun()
+  {
+    viewusersfun();
+    setTimeout(function(){
+     refreshbuttonfun();
+    },1500);
+  }
+    function playgamefun()
+     {
+      location.href="http://localhost:2001/index?"+username+"";
+     }
+     function viewusersfun()
+     {
+      socket.emit('view allusers',{});
+       
+        
+         console.log("im indside taable update");
+         setTimeout(function() {
+          $.get('http://localhost:2001/records', {}, function(data2){
+              var tb=document.getElementById('table');
+              tb.innerHTML+="<tr><th>*</th><th><strong>users</strong></th><td><strong>rating</strong></td><td><strong>status</strong></td><td><strong>permission</strong></td></tr>";
+              console.log(data2+"(");
+              for(var i=0;i<data2.length;i++)
+              {
+              
+              tb.innerHTML+="<tr><td><input class="+"radios"+" type="+"radio"+" value="+data2[i]['username']+" group="+"allradio"+" name="+"allradio2"+"</td><td>"+data2[i]['username']+"</td><td>"+data2[i]['rating']+"</td><td>"+data2[i]['status']+"</td><td>"+data2[i]['permission']+"</td></tr>";
+              }
+                 $table.show();
+      $backbutton.show();
+      $refreshbutton.show();
+      $blockuserbutton.show();
+      $unblockuserbutton.show();
+      $viewstatsbutton.show();
+      $viewprofilebutton.show();
+      $playgame.hide();
+         $viewusers.hide();
+         $viewallgames.hide();
+         $viewleaderboard.hide();
+            });
+        },1000);
+      
+     
+             console.log("im outside taable update");
+     }
+     function logoutfun()
+     {
+      
+      socket.emit('user logged out',{user:username});
+      location.href="/login";
+     }
+     function backbuttonfun()
+     {
+      var tb=document.getElementById('table');
+      tb.innerHTML="";
+      $table.hide();
+      $backbutton.hide();
+      $refreshbutton.hide();
+      $blockuserbutton.hide();
+      $unblockuserbutton.hide();
+      $viewstatsbutton.hide();
+      $viewprofilebutton.hide();
+      $playgame.show();
+      $viewusers.show();
+      $viewallgames.show();
+      $viewleaderboard.show();
+     }
+     function refreshbuttonfun()
+     {
+      
+      var tb=document.getElementById('table');
+      tb.innerHTML="";
+      viewusersfun();
+      
+     }
+     function blockuserbuttonfun()
+     {
+        var x=document.getElementsByClassName("radios");
+        console.log(x.length);
+        for(var i=0;i<x.length;i++)
+        {
+          if(x[i].checked==true)
+           {
+            
+            socket.emit('block user',{user:x[i].value});
+            break;
+           }
+        }
+        setTimeout(function() {
+          refreshbuttonfun();
+        },100);
+        
+     }
+     function unblockuserbuttonfun()
+     {
+        var x=document.getElementsByClassName("radios");
+        console.log(x.length);
+        for(var i=0;i<x.length;i++)
+        {
+          if(x[i].checked==true)
+           {
+            
+            socket.emit('unblock user',{user:x[i].value});
+            break;
+           }
+        }
+        setTimeout(function() {
+          refreshbuttonfun();
+        },100);
+     }
+     function viewstatsbuttonfun()
+     {
+        var x=document.getElementsByClassName("radios");
+        console.log(x.length);
+        for(var i=0;i<x.length;i++)
+        {
+          if(x[i].checked==true)
+           {
+            
+            socket.emit('view stats',{user:x[i].value});
+            location.href="http://localhost:2001/stats?"+x[i].value+"&"+2+"&"+username+"";
+            break;
+           }
+        }
+        
+     }
+     function viewprofilebuttonfun()
+     {
+        var x=document.getElementsByClassName("radios");
+        console.log(x.length);
+        for(var i=0;i<x.length;i++)
+        {
+          if(x[i].checked==true)
+           {
+            
+           
+            location.href="http://localhost:2001/profilepage?"+x[i].value+"&"+2+"&"+username+"";
+            break;
+           }
+        }
+        
+     }
+     function viewallgamesfun()
+     {
+      socket.emit('view allgames',{});
+      location.href="http://localhost:2001/pastgame?"+name+"&"+2+"";
+     }
+     function viewleaderboardfun()
+     {
+      
+      socket.emit('view leaderboard',{});
+      location.href="http://localhost:2001/leaderboard?"+name+"&"+2+"";
+     }
+  
+</script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" >
+  <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <title>tictactoe friendlist</title>
+</head>
+<body>
+Enter friend's name:<input id="friendinput" type="text" name="friendnametext"><br>
+<button id="submitfriendsbutton" onclick="submitfriendsbutfun()" class ="btn btn-primary">submit to add to friend list</button><br>
+<button id="backbutton" onclick="backbuttonfun()" class ="btn btn-primary">back</button>
+ <button id="refreshbutton" onclick="refreshbuttonfun()" class ="btn btn-primary">refresh</button>
+ <button id="viewstatsbutton" onclick="viewstatsbuttonfun()" class ="btn btn-primary">view stats</button>
+ <button id="unfriendbutton" onclick="unfriendbuttonfun()" class ="btn btn-primary">Unfriend</button>
+
+<table id="table" style="width:100%">
+    
+  </table>
+<script type="text/javascript">
+  var name;
+  var socket = io.connect();
+  $friendinput=$('#friendinput');
+   $(function(){
+    name = window.location.search.replace(/^\?/, '');
+
+    socket.emit('view friendlist',{user:name});
+    viewusersfun();
+
+   });
+   function viewusersfun()
+     {
+      socket.emit('view friendlist',{user:name});
+         setTimeout(function(){
+           $.get('http://localhost:2001/records', {}, function(data2){
+              var tb=document.getElementById('table');
+              
+              tb.innerHTML+="<tr><th>*</th><td><strong>friends</strong></td><td><strong>rating</strong></td></tr>";
+              for(var i=0;i<data2.length;i++)
+              {
+              
+              tb.innerHTML+="<tr><td><input class="+"radios"+" type="+"radio"+" value="+data2[i]['username2']+" group="+"allradio"+" name="+"allradio2"+"</td><td>"+data2[i]['username2']+"</td><td>"+data2[i]['rating']+"</td></tr>";
+              }
+                 
+            });
+         },400);
+        
+        
+     }
+     function refreshbuttonfun()
+     {
+      
+      var tb=document.getElementById('table');
+      tb.innerHTML="";
+      viewusersfun();
+      
+     }
+     function submitfriendsbutfun()
+     {
+      socket.emit('add friend',{user:name,friend:$friendinput.val()});
+      
+      setTimeout(function(){
+          refreshbuttonfun();
+        },500);
+     }
+     function unfriendbuttonfun()
+     {
+      var x=document.getElementsByClassName("radios");
+        console.log(x.length);
+        for(var i=0;i<x.length;i++)
+        {
+          if(x[i].checked==true)
+           {
+            
+            socket.emit('remove friend',{user:name,friend:x[i].value});
+            
+            break;
+           }
+        }
+        
+        setTimeout(function(){
+          refreshbuttonfun();
+        },500);
+       
+     }
+     function backbuttonfun()
+     {
+      var tb=document.getElementById('table');
+      tb.innerHTML="";
+       location.href="http://localhost:2001/index?"+name+"";
+     }
+     function viewstatsbuttonfun()
+     {
+        var x=document.getElementsByClassName("radios");
+        console.log(x.length);
+        for(var i=0;i<x.length;i++)
+        {
+          if(x[i].checked==true)
+           {
+            
+            socket.emit('view stats',{user:x[i].value});
+            location.href="http://localhost:2001/stats?"+x[i].value+"&"+3+"&"+name+"";
+            break;
+           }
+        }
+        
+        
+     }
+</script>
+</body>
+</html>

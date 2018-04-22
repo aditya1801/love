@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>tictactoe profilepage</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" >
+  <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <style type="text/css">
+  	#usernamemessage{
+		
+		font-size:15pt;
+		border: 0;
+		margin-bottom: 0px;
+		height:35px;
+		width:500px;
+		text-align:center;
+	}
+	#emailmessage{
+		
+		font-size:15pt;
+		border: 0;
+		margin-bottom: 0px;
+		height:35px;
+		width:500px;
+		text-align:center;
+	}
+	#message{
+		
+		font-size:15pt;
+		border: 0;
+		margin-bottom: 0px;
+		height:35px;
+		width:500px;
+		text-align:center;
+	}
+	#enteroldpasswordlabel{
+		
+		font-size:15pt;
+		border: 0;
+		margin-bottom: 0px;
+		
+		text-align:center;
+	}
+	#password0{
+		
+		font-size:15pt;
+		
+		margin-bottom: 0px;
+		border: 1;
+		text-align:center;
+	}
+	#enterpasswordlabel{
+		
+		font-size:15pt;
+		border: 0;
+		margin-bottom: 0px;
+		
+		text-align:center;
+	}
+	#password1{
+		
+		font-size:15pt;
+		border: 1;
+		margin-bottom: 0px;
+		
+		text-align:center;
+	}
+	#confirmpasswordlabel{
+		
+		font-size:15pt;
+		border: 0;
+		margin-bottom: 0px;
+		
+		text-align:center;
+	}
+	#usernamelabel{
+		
+		font-size:15pt;
+		border: 0;
+		margin-bottom: 0px;
+		
+		text-align:center;
+	}
+	#emaillabel{
+		
+		font-size:15pt;
+		border: 0;
+		margin-bottom: 0px;
+		
+		text-align:center;
+	}
+	#password2{
+		
+		font-size:15pt;
+		border: 1;
+		margin-bottom: 0px;
+		
+		text-align:center;
+	}
+    #back1button
+	{
+       font-size:10pt;
+       text-align:center;
+       font:italic;
+	}
+  </style>
+</head>
+<body>
+<label id="usernamelabel">Username</label><textarea id="usernamemessage" readonly ></textarea><br>
+<label id="emaillabel">Email</label><textarea id="emailmessage" readonly ></textarea><br>
+<button id="changepassword1button" onclick="changepassword1buttonfun()" class ="btn btn-primary">change password</button>
+<button id="back1button" onclick="back1buttonfun()" class ="btn btn-primary">back</button><br>
+<textarea id="message" readonly ></textarea><br>
+<label id="enteroldpasswordlabel">Enter old password:</label><input type="password" id="password0"></input><br>
+<button id="changepassword2button" onclick="changepassword2buttonfun()" class ="btn btn-primary">change password</button><br>
+<label id="enterpasswordlabel">Enter new password:</label><input type="password" id="password1"></input><br>
+<label id="confirmpasswordlabel">Confirm password:</label><input type="password" id="password2"></input><br>
+<button id="changepassword3button" onclick="changepassword3buttonfun()" class ="btn btn-primary">change password</button><br>
+<button id="back2button" onclick="back2buttonfun()" class ="btn btn-primary">back</button>
+<script type="text/javascript">
+	var socket=io.connect();
+	var $usernamemessage=$('#usernamemessage');
+	var $emailmessage=$('#emailmessage');
+	var $message=$('#message');
+	var $changepassword1button=$('#changepassword1button');
+	var $changepassword2button=$('#changepassword2button');
+	var $changepassword3button=$('#changepassword3button');
+	var $enteroldpasswordlabel=$('#enteroldpasswordlabel');
+	var $enterpasswordlabel=$('#enterpasswordlabel');
+	var $password0=$('#password0');
+	var $password1=$('#password1');
+	var $confirmpasswordlabel=$('#confirmpasswordlabel');
+	var $password2=$('#password2');
+	var $back1button=$('#back1button');
+	var $back2button=$('#back2button');
+	var realpassword,realemail;
+	var y;
+	      var realusername;
+	      var name;
+
+	$(function(){
+          $enterpasswordlabel.hide();
+          $confirmpasswordlabel.hide();
+          $password0.hide();
+          $password1.hide();
+          $confirmpasswordlabel.hide();
+          $password2.hide();
+          $changepassword2button.hide();
+          $changepassword3button.hide();
+          $back2button.hide();
+          $enteroldpasswordlabel.hide();
+                    var str = window.location.search.replace(/^\?/, '');
+            name="";
+            realusername="";
+            var i;
+		    for(i=0;str[i]&&str[i]!='&';i++)
+		   {
+             name+=str[i];
+		    }
+           y=str[i+1];
+           i=i+3;
+           for(;str[i];i++)
+            {
+             realusername+=str[i];
+            }
+          
+          socket.emit('get user',{user:name});
+          setTimeout(function(){
+          	$.get('http://localhost:2001/records', {}, function(data2){
+              $usernamemessage.val(name);
+              $emailmessage.val(data2[0]['email']);
+              realemail=$emailmessage;
+              realpassword=data2[0]['password'];
+              });
+          },100);
+          
+
+          
+	});
+          function changepassword1buttonfun()
+          {
+             $changepassword1button.hide();
+             $enteroldpasswordlabel.show();
+             $changepassword2button.show();
+             $back1button.hide();
+             $back2button.show();
+             $password0.show();
+          }
+          function changepassword2buttonfun()
+          {
+          	 if($password0.val()==realpassword)
+          	 {$message.val("");
+             $enteroldpasswordlabel.hide();
+             $changepassword2button.hide();
+             $password0.hide();
+
+             $enterpasswordlabel.show();
+             $confirmpasswordlabel.show();
+             $password1.show();
+             $password2.show();
+             $changepassword3button.show();
+             }
+             else
+             {
+             	$message.val("incorrect password");
+             }
+          }
+
+          function changepassword3buttonfun()
+          {
+          	if($password1.val()==$password2.val())
+          	{
+          		$message.val("password changed successfuly");
+          		socket.emit('change password',{user:name,newpass:$password1.val()});
+          	}
+          	else
+          	{
+          		$message.val("password do not match");
+          	}
+          }
+          function back1buttonfun()
+          {
+              if(y==1)
+              {
+              	location.href="http://localhost:2001/index?"+name+"";
+              }
+              if(y==2)
+              {
+              	location.href="http://localhost:2001/admin?"+realusername+"";
+              }
+          }
+          function back2buttonfun()
+          {
+          $enterpasswordlabel.hide();
+          $confirmpasswordlabel.hide();
+          $password0.hide();
+          $password1.hide();
+          $confirmpasswordlabel.hide();
+          $password2.hide();
+          $changepassword2button.hide();
+          $changepassword3button.hide();
+          $back2button.hide();
+          $enteroldpasswordlabel.hide();
+          $back1button.show();
+          $changepassword1button.show();
+          $message.val("");
+          $password0.val("");
+          $password1.val("");
+          $password2.val("");
+          }
+      
+
+</script>
+</body>
+</html>
