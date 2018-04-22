@@ -9,7 +9,7 @@ var connection2 = mysql.createConnection({
         host: 'localhost',
         user: 'root',
         password: "",
-        database: 'registration2'
+        database: 'registration'
 });
 connection2.connect();
 connections =[];
@@ -35,20 +35,12 @@ app.get("/stats", function (req, res) {
 res.sendFile(__dirname + "/stats.html");
 });
 
-app.get("/admin", function (req, res) {
-res.sendFile(__dirname + "/admin.html");
-});
-
 app.get("/leaderboard", function (req, res) {
 res.sendFile(__dirname + "/leaderboard.html");
 });
 
 app.get("/pastgame", function (req, res) {
 res.sendFile(__dirname + "/pastgame.html");
-});
-
-app.get("/playrecord", function (req, res) {
-res.sendFile(__dirname + "/playrecord.html");
 });
 
 app.get("/index", function (req, res) {
@@ -58,15 +50,6 @@ res.sendFile(__dirname + "/index.html");
 app.get("/register", function (req, res) {
 res.sendFile(__dirname + "/register.html");
 });
-
-app.get("/friendlist", function (req, res) {
-res.sendFile(__dirname + "/friendlist.html");
-});
-
-app.get("/profilepage", function (req, res) {
-res.sendFile(__dirname + "/profilepage.html");
-});
-
 var username;
 var mrecords;
 app.get("/username", function (req, res) {
@@ -79,30 +62,18 @@ app.post("/login", function (req, res) {
 //res.sendFile(__dirname + "/login.html");
 username = req.body.username;
 var password = req.body.password;
-var query = "SELECT * FROM player p,admintable a WHERE p.username='"+username+"' AND p.password='"+password+"' AND a.permission='allowed' AND a.username='"+username+"'";
+var query = "SELECT * FROM player WHERE username='"+username+"' AND password='"+password+"'";
 var numrows;
 var results;
 connection2.query(query, function(err,results) {
 	console.log(results.length+"&");
     numrows = results.length;
-
     if(numrows==1)
-   { var query="UPDATE admintable SET status='online' WHERE username='"+username+"'";
-           connection2.query(query);
-           console.log("ur successful");
-          if(results[0]['adminstatus']=='no')
-          res.redirect('/index');
-          else
-          res.redirect('./admin');
-         }
-         else
-         {
-            console.log("im inside no errors");
-            io.sockets.emit('no account',{});
-         }
-    
-    
-   
+{
+	console.log("ur successful");
+	res.redirect('/index');
+
+}
 });
 //console.log(numrows+"%");
 
@@ -111,42 +82,16 @@ console.log(query);
 //console.log(req.body.password);
 });
 app.post("/register", function (req, res) {
-//res.sendFile(__dirname + "/register.html");
+res.sendFile(__dirname + "/register.html");
  var username = req.body.username;
   var email = req.body.email;
   var password = req.body.password_1;
   var password_2 = req.body.password_2;
-  if(password==password_2)
-  {
-    console.log("step=2");
-    var query = "SELECT * FROM player WHERE username='"+username+"'";
-   
-     connection2.query(query, function(err,results) {
-            
-            if(results.length==0)
-            {console.log("step=1");
-        io.sockets.emit('registered',{});
-                var query = "INSERT INTO player (username, email, password,rating) VALUES('"+username+"', '"+email+"', '"+password+"',"+1000+")";
+   var query = "INSERT INTO player (username, email, password,rating) VALUES('"+username+"', '"+email+"', '"+password+"',"+1000+")";
    console.log(query);
-    connection2.query(query);
-     var query = "INSERT INTO multiplayerrecords (username) VALUES('"+username+"')";
-     connection2.query(query);
-     var query = "INSERT INTO admintable (username) VALUES('"+username+"')";
-     connection2.query(query);
-            }
-            else
-            {console.log("step=3");
-                io.sockets.emit('username taken',{});
-            }
-            
-        });
-   
- }
- else
- { 
-    console.log("wrong password inside");
-    io.sockets.emit('password unmatch',{});
- }
+  	connection2.query(query);
+  	 var query = "INSERT INTO multiplayerrecords (username) VALUES('"+username+"')";
+  	 connection2.query(query);
 });
 
 setInterval(function () {
@@ -159,7 +104,6 @@ setInterval(function () {
     waitingQueue.splice(index, 1);
     var p=0;
     //index = Math.floor(Math.random() * waitingQueue.length);
-
     console.log(index+" $% "+playerX.username);
     var min=10000;
     for(var i=0;i<waitingQueue.length;i++)
@@ -198,7 +142,6 @@ setInterval(function () {
 }, 2000);
 
 io.sockets.on('connection',function(socket){
-    console.log("###### "+socket.id+" !!!!!!!");
 	connections.push(socket);
 	console.log('connected : %s sockets connected',connections.length);
 
@@ -229,14 +172,13 @@ io.sockets.on('connection',function(socket){
             
             socket.rating=results[0]['rating'];
             console.log(socket.rating+"%%");
-            waitingQueue.push(socket);
-            console.log(waitingQueue.length+"&&&");
-            console.log("pushed lala");
-            users.push(socket.username);
-            updateUsernames();
         });
         
-         
+         waitingQueue.push(socket);
+         console.log(waitingQueue.length+"&&&");
+         console.log("pushed lala");
+        users.push(socket.username);
+        updateUsernames();
 	});
 	socket.on('make a move',function(data)
 	{
@@ -296,18 +238,7 @@ io.sockets.on('connection',function(socket){
     {
         var query = "SELECT * FROM pastgames WHERE realusername='"+data.user+"'";
         connection2.query(query, function(err,results) {
-          
-          mrecords=results;
-          
-        });
-        
-
-    });
-    socket.on('view allgames',function(data)
-    {
-        var query = "SELECT * FROM pastgames ";
-        connection2.query(query, function(err,results) {
-          
+          console.log(results);
           mrecords=results;
           
         });
@@ -319,95 +250,12 @@ io.sockets.on('connection',function(socket){
         console.log("inside server leaderboard");
         var query = "SELECT * FROM multiplayerrecords ORDER BY rating DESC,no_of_wins DESC,no_of_loses ASC, max_winning_streak DESC,max_losing_streak ASC,max_drawing_streak DESC";
         connection2.query(query, function(err,results) {
-          
+          console.log(results);
           mrecords=results;
           
         });
         
 
-    });
-     socket.on('view allusers',function(data)
-    {
-        
-        var query = "SELECT * FROM admintable ORDER BY status DESC,rating DESC,username ASC";
-        connection2.query(query, function(err,results) {
-          
-          mrecords=results;
-          
-        });
-        
-
-    });
-     socket.on('user logged out',function(data)
-    {
-        
-        var query = "UPDATE admintable SET  status='offline' WHERE username='"+data.user+"'";
-        connection2.query(query);
-        
-
-    });
-      socket.on('block user',function(data)
-    {
-        var query="UPDATE admintable SET permission='blocked' WHERE username=(SELECT username FROM player WHERE username='"+data.user+"' AND adminstatus='no')"
-         connection2.query(query);
-        
-
-    });
-      socket.on('unblock user',function(data)
-    {
-        
-        var query = "UPDATE admintable SET  permission='allowed' WHERE username='"+data.user+"'";
-        connection2.query(query);
-        
-
-    });
-
-     socket.on('view friendlist',function(data)
-    {
-        
-        var query = "SELECT f.username2,p.rating FROM friendtable f,player p WHERE p.username=f.username2 AND f.username1='"+data.user+"' ORDER BY p.rating DESC,f.username2 ASC ";
-        console.log(query);
-        connection2.query(query, function(err,results) {
-          
-          mrecords=results;
-          
-        });
-        
-    });
-     socket.on('add friend',function(data)
-    {
-        
-        var query = "INSERT INTO friendtable(username1,username2) VALUES('"+data.user+"','"+data.friend+"')";
-        var query2= "INSERT INTO friendtable(username1,username2) VALUES('"+data.friend+"','"+data.user+"')";
-        connection2.query(query);
-        connection2.query(query2);
-    });
-     socket.on('remove friend',function(data)
-    {
-        
-        var query = "UPDATE friendtable SET username1='"+"',username2='"+"' WHERE username1='"+data.user+"' AND username2='"+data.friend+"'";
-        var query2= "UPDATE friendtable SET username1='"+"',username2='"+"' WHERE username2='"+data.user+"' AND username1='"+data.friend+"'";
-        connection2.query(query);
-        connection2.query(query2);
-    });
-     socket.on('get user',function(data)
-    {
-        
-        var query = "SELECT * FROM player WHERE username='"+data.user+"'";
-        
-        connection2.query(query, function(err,results) {
-          
-          mrecords=results;
-          
-        });
-        
-    });
-     socket.on('change password',function(data)
-    {
-        
-        var query = "UPDATE player SET password='"+data.newpass+"' WHERE username='"+data.user+"'";
-        connection2.query(query);
-        
     });
 	socket.on('new record',function(data)
 	{
@@ -434,8 +282,7 @@ io.sockets.on('connection',function(socket){
 		{
             var query="UPDATE multiplayerrecords SET  no_of_wins=no_of_wins+1,rating=rating+50 WHERE username='"+data.user+"'";
             var query3="UPDATE player SET  rating=rating+50 WHERE username='"+data.user+"'";
-             var query5="UPDATE admintable SET  rating=rating+50 WHERE username='"+data.user+"'";
-            var query4="INSERT INTO pastgames(realusername,username1,username2,status,time,recordgame,firstturn) VALUES ('"+data.user+"','"+data.p1+"', '"+data.p2+"', 'win','"+currentdate+"','"+data.recordgame+"','"+data.firstturn+"')";
+            var query4="INSERT INTO pastgames(realusername,username1,username2,status,time) VALUES ('"+data.user+"','"+data.p1+"', '"+data.p2+"', 'win','"+currentdate+"')";
             console.log(query4);
             if(lastrecord==1||lastrecord==-1)
             	{
@@ -460,8 +307,7 @@ io.sockets.on('connection',function(socket){
 		{
             var query3="UPDATE player SET  rating=rating-50 WHERE username='"+data.user+"'";
             var query="UPDATE multiplayerrecords SET  no_of_loses=no_of_loses+1,rating=rating-50 WHERE username='"+data.user+"'";
-            var query4="INSERT INTO pastgames(realusername,username1,username2,status,time,recordgame,firstturn) VALUES ('"+data.user+"','"+data.p1+"', '"+data.p2+"', 'lose','"+currentdate+"','"+data.recordgame+"','"+data.firstturn+"')";
-             var query5="UPDATE admintable SET  rating=rating+50 WHERE username='"+data.user+"'";
+            var query4="INSERT INTO pastgames(realusername,username1,username2,status,time) VALUES ('"+data.user+"','"+data.p1+"', '"+data.p2+"', 'lose','"+currentdate+"')";
             if(lastrecord==0||lastrecord==-1)
             	{
             		currentlosingstreak+=1;
@@ -483,8 +329,7 @@ io.sockets.on('connection',function(socket){
 		{
             var query3="UPDATE player SET  rating=rating WHERE username='"+data.user+"'";
 			var query="UPDATE multiplayerrecords SET  no_of_draws=no_of_draws+1 WHERE username='"+data.user+"'";
-           var query4="INSERT INTO pastgames(realusername,username1,username2,status,time,recordgame,firstturn) VALUES ('"+data.user+"','"+data.p1+"', '"+data.p2+"', 'draw','"+currentdate+"','"+data.recordgame+"','"+data.firstturn+"')";
-            var query5="UPDATE admintable SET  rating=rating+50 WHERE username='"+data.user+"'";
+           var query4="INSERT INTO pastgames(realusername,username1,username2,status,time) VALUES ('"+data.user+"','"+data.p1+"', '"+data.p2+"', 'draw','"+currentdate+"')";
             if(lastrecord==3||lastrecord==-1)
             	{currentdrawingstreak+=1;
             	 lastrecord=3;
@@ -500,13 +345,11 @@ io.sockets.on('connection',function(socket){
 		}
 		 console.log(query);
         console.log(query2);
-         var mainquery=query+";"+query2+";"+query3+";"+query4+";"+query5+";";
-         console.log(mainquery);
+         
 		connection2.query(query);
 		connection2.query(query2);
         connection2.query(query3);	
         connection2.query(query4);
-        connection2.query(query5);
 	    });
 		
        

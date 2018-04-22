@@ -3,82 +3,157 @@
 <head>
 	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 	<title>stats</title>
-	<script src="/socket.io/socket.io.js"></script>
 	<style type="text/css">
+body
+  {
+    margin-top:62px;
+    background:url("https://i.imgur.com/mc1SHbe.gif");
+ 
+  background-size: 1640px 900px;
+  }
+
+
+
+	@header-color: gray; 
+@table-color: darken(gray, 20%);
+@vertical-border-width: 4px;
+@horizontal-border-width: 1px;
+
+
+
+
+
+
+
+table{
+
+
+  color: white;
+  border-spacing: 0;
+  position: static;
+
+}
+
+tr:first-child{
+  background-color: @header-color;
+}
+
+tr:nth-child(2) > td{
+  border-top-width: 0;
+}
+
+tr{
+  background-color: @table-color;
+}
+
+th, td{
+  margin: 0;
+  padding: .5em 1.5em;
+  text-align: center;
+  border-width: @horizontal-border-width 0;
+  border-color: @header-color;
+  border-style: solid;
+}
+
+th{
+  border-bottom-width: @horizontal-border-width;
+}
+
+th:nth-child(even){
+  border-width: 0 @vertical-border-width;
+  border-color: @table-color;
+  border-style: solid;
+}
+
+td:nth-child(even){
+  border-width: @horizontal-border-width @vertical-border-width;
+  border-color: @header-color;
+  border-style: solid;
+}
+
+#backbutton{
+
+	position: fixed;
+      top: 700px;
+      right: 60px;
+      width: 80px;
+       background:transparent;
+ color:orange;
+ 
+font: italic;
+}
+
+
+
+
 			#playername{
 		
-		font-size:15pt;
-		border: 0;
-		margin-bottom: 0px;
-		height:35px;
-		text-align:center;
+		position: fixed;
+      top: 20px;
+      right: 600px;
+      width: 300px;
+      height: 40px;
+
+		 
+  background:transparent;
+  text-align:center;
+  font-size:30px;
+ background-size: 1px 300%;
+ -webkit-transition:0.5s;
+  transition:0.5s;
+  color:orange;
 	}
 	</style>
 </head>
 <body>
 	<h2><textarea id="playername" readonly ></textarea></h2>
-	<button id="backbutton" onclick="backbuttonfun()">back</button>
+	<button id="backbutton" onclick="backbuttonfun()">BACK</button>
 	<table id="table" style="width:100%">
 		<tr>
 			
-			<td><strong>rating</strong></td>
-			<td><strong>wins</strong></td>
-			<td><strong>loses</strong></td>
-			<td><strong>draws</strong></td>
-			<td><strong>win streak</strong></td>
-			<td><strong>losing streak</strong></td>
-			<td><strong>draw streak</strong></td>
+			
+			<th><strong>RATING</strong></th>
+			<th><strong>WINS</strong></th>
+			<th><strong>LOSES</strong></th>
+			<th><strong>DRAW</strong></th>
+			<th><strong>WIN STREAK</strong></th>
+			<th><strong>LOSING STREAK</strong></th>
+			<th><strong>DRAW STREAK</strong></th>
 		</tr>
 	</table>
 
 <script >
-	var y,username;
-	var realusername;
-	var name;
-	var socket = io.connect();
+	var username;
 	var $playername=$('#playername'); 
 	$(function(){
-		var str = window.location.search.replace(/^\?/, '');
-        name="";
-        realusername="";
-        var i;
-		for(i=0;str[i]&&str[i]!='&';i++)
-		{
-             name+=str[i];
-		}
-        y=str[i+1];
-        i=i+3;
-        for(;str[i];i++)
-        {
-             realusername+=str[i];
-        }
-        console.log(str+" "+name+" "+y+" "+realusername+" %) ");
-              
-              $playername.val(name);
+		$.get('http://localhost:2001/username', {}, function(data){
+              username=data;
+              console.log(username);
+              $playername.val(username);
               var i;
               $.get('http://localhost:2001/records', {}, function(data2){
-              
-              console.log(i+" "+data2[0]);
+              for(i=0;i<data2.length;i++)
+              {
+              	if(data2[i]['username']==username)
+              	{
+                  break;
+              	}
+              }
+              console.log(i+" "+data2[i]);
               var tb=document.getElementById('table');
-              tb.innerHTML+="<tr><td>"+data2[0]['rating']+"</td><td>"+data2[0]['no_of_wins']+"</td><td>"+data2[0]['no_of_loses']+"</td><td>"+data2[0]['no_of_draws']+"</td><td>"+data2[0]['max_winning_streak']+"</td><td>"+data2[0]['max_losing_streak']+"</td><td>"+data2[0]['max_drawing_streak']+"</td></tr>";
+              tb.innerHTML+="<tr><td>"+data2[i]['rating']+"</td><td>"+data2[i]['no_of_wins']+"</td><td>"+data2[i]['no_of_loses']+"</td><td>"+data2[i]['no_of_draws']+"</td><td>"+data2[i]['max_winning_streak']+"</td><td>"+data2[i]['max_losing_streak']+"</td><td>"+data2[i]['max_drawing_streak']+"</td></tr>";
 
 
             });
             });
 		
-	
+	});
 	function backbuttonfun()
 	{
-		if(y==1)
-	  location.href="http://localhost:2001/index?"+name+"";
-	     if(y==2)
-	  location.href="http://localhost:2001/admin?"+realusername+"";
-	     if(y==3)
-	     {
-	     	 socket.emit('view friendlist',{user:realusername});
-	   location.href="http://localhost:2001/friendlist?"+realusername+"";
-	     }     	
+	  location.href="/index";
 	}
 </script>
 </body>
 </html>
+
+

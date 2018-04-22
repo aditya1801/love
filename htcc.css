@@ -255,3 +255,12 @@ body {
   top:0px;
   
 }
+
+
+
+
+
+
+
+
+  <button id="playsingleplayerbutton" onclick="playsingleplayerfun()" class ="btn btn-primary">play singleplayer</button><br><br>
