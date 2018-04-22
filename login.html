@@ -1,14 +1,30 @@
+
+<!DOCTYPE html>
 <html>
 <head>
-    <title> Transparent Login Form Design </title>
-    <link rel="stylesheet" type="text/css">   
-    <style>
+  <title>Registration system PHP and MySQL</title>
+  <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" >
+  <script src="/socket.io/socket.io.js"></script>
+  <style type="text/css">
+    #labelm{
+    display:none;
+    font-size:15pt;
+    border: 0;
+    margin-bottom: 0px;
+    height:40px;
+    width:250px;
+    text-align:center;
+    background-color: transparent;
+    
+    color: #840707;
+    }
     body{
     margin: 0;
      width: 20px;
     height: 1000px;
     padding: 0;
-    background: url("https://files.sexyandfunny.com/img_disp/img4e82ae6eee82d.jpg");
+     background: url("https://wallpaperscraft.com/image/lara_croft_tomb_raider_art_girl_97252_1920x1080.jpg");
     background-size: cover;
     background-position: center;
     font-family: sans-serif;
@@ -87,34 +103,41 @@ h1{
 }
   </style>
 </head>
-    <body>
-    <div class="login-box">
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSNwH9DCM75f13HIcF0PmBnDf8o2WVrCHk6haHMCNrTlfkO_iqy" class="avatar">
-        <h1>Login Here</h1>
-            
-            <p>Username</p>
-            <input type="text" name="username" placeholder="Enter Username">
-            <p>Password</p>
-            <input type="password" name="password" placeholder="Enter Password">
-
-            
-            
-            <a class="btn btn-primary" href="/index"><input type="submit" name="submit" value="login"></a>
-                    
-           
-
-            <a href="#">Forget Password</a>    
-
-            <p>
-      Not yet a member? <a class="btn btn-primary" href="/register"  href="#">Sign up</a>
-           </p>
-
-            </div>
-   
-            </form>
-        
-        
-        </div>
+<body>
+  <div class="login-box">
     
-    </body>
+  <div class="header">
+  	<h2>Login</h2>
+  </div>
+	 
+  <form method="post" action="/login">
+  
+  	<div class="input-group">
+  		<label>Username </label>
+  		<input type="text" name="username" placeholder="Enter Username" >
+  	</div>
+  	<div class="input-group" >
+  		<label>Password  </label>
+  		<input type="password" name="password" placeholder="Enter Password">
+  	</div>
+  	<div class="input-group">
+  		<button type="submit" class="btn btn-primary" name="login_user" >Login</button>
+  	</div>
+  	<p>
+  		Not yet a member? <a class="btn btn-primary" href="/register">Sign up</a>
+  	</p>
+  </form>
+  <textarea id="labelm" readonly></textarea>
+    </div>
+  <script type="text/javascript">
+    var socket=io.connect();
+    var $labelm=$('#labelm');
+    socket.on('no account',function(data)
+    {
+      $labelm.show();
+      $labelm.val("Wrong username/password");
+      console.log("wronggg");
+    });
+  </script>
+</body>
 </html>

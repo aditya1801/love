@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>tictactoe recording</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" >
+  <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <style type="text/css">
+  .tictable
+  {
+    width:500px;
+    position: fixed;
+  top: 50%;
+  left: 50%;
+  /* bring your own prefixes */
+  transform: translate(-50%, -50%);
+  }
+  .square
+  {
+    height:160px;
+    width: 80px;
+    font-size:85pt;
+    text-align:center;
+  }
+  #player1message{
+    
+    font-size:15pt;
+    border: 0;
+    margin-bottom: 0px;
+    height:35px;
+    width:250px;
+    text-align:center;
+  }
+  #message{
+    
+    font-size:15pt;
+    border: 0;
+    margin-bottom: 0px;
+    height:35px;
+    width:250px;
+    text-align:center;
+
+  left: 50%;
+
+  }
+  #player2message{
+    
+    font-size:15pt;
+    border: 0;
+    margin-bottom: 0px;
+    height:35px;
+    width:250px;
+    text-align:center;
+  }
+  </style>
+</head>
+<body>
+<textarea id="player1message" readonly ></textarea>
+<textarea id="message" readonly ></textarea>
+<textarea id="player2message" readonly ></textarea>
+<table  id="table" class="tictable" border="1">
+          <tr>
+            <td id="1" class="square" ></td>
+            <td id="2" class="square" ></td>
+            <td id="3" class="square" ></td>
+          </tr>
+          <tr>
+            <td id="4" class="square" ></td>
+            <td id="5" class="square" ></td>
+            <td id="6" class="square" ></td>
+          </tr>
+          <tr>
+            <td id="7" class="square" ></td>
+            <td id="8" class="square" ></td>
+            <td id="9" class="square" ></td>
+          </tr>
+        </table>
+<button id="replaybutton" onclick="replaybuttonfun()" class ="btn btn-primary">Replay</button>
+<button id="backbutton" onclick="backbuttonfun()" class ="btn btn-primary">Back</button>
+<script type="text/javascript">
+       var str,name,recordplayer1,recordplayer2,firstturnplayer,gamemovedata,y;
+       var $message=$('#message');
+       var $player1message=$('#player1message');
+       var $player2message=$('#player2message');
+       var socket = io.connect();
+  $(function(){
+         str = window.location.search.replace(/^\?/, '');
+           name="";
+           recordplayer1="";
+           recordplayer2="";
+           firstturnplayer="";
+           gamemovedata="";
+         
+           var i;
+           for(i=0;str[i]&&str[i]!='&';i++)
+           {
+             name+=str[i];
+           }
+           
+           i=i+1;
+            for(;str[i]&&str[i]!='&';i++)
+            {
+             recordplayer1+=str[i];
+            }
+            i=i+1;
+            for(;str[i]&&str[i]!='&';i++)
+            {
+             recordplayer2+=str[i];
+            }
+            i=i+1;
+            for(;str[i]&&str[i]!='&';i++)
+            {
+             firstturnplayer+=str[i];
+            }
+            i=i+1;
+            
+            for(;str[i]!='%';i++)
+            {
+             gamemovedata+=str[i];
+            }
+            i=i+1;
+            y=str[i];
+            console.log(name+" "+recordplayer1+" "+recordplayer2+" "+firstturnplayer+" "+gamemovedata+" "+y+" ))");
+            if(firstturnplayer==recordplayer1&&gamemovedata[0]=='x')
+            {
+                $player1message.val(recordplayer1+"=>X");
+                $player2message.val(recordplayer2+"=>O");
+            }
+            else
+            {
+                $player1message.val(recordplayer1+"=>O");
+                $player2message.val(recordplayer2+"=>X");
+            }
+           
+          replaybuttonfun();
+
+  });
+  function replaybuttonfun()
+  {
+    var l=0;
+            for(var i=0;gamemovedata[i]!='&';i++)
+            {
+              l++;
+            }
+      for(var i=1;i<=9;i++)
+        {
+          clearbox(i);
+        }
+     var i=0;
+            
+            timerid2=setInterval(function() {
+              if(gamemovedata[i+2]=='&')
+              {
+
+                clearInterval(timerid2);
+              }
+            console.log(gamemovedata[i+1]);
+              if(gamemovedata[i]=='x')
+              {
+                $message.val("player=>X turn");
+                var x = document.getElementById(gamemovedata[i+1]);
+                x.innerText='x';
+              }
+              else
+              {
+                $message.val("player=>O turn");
+                var x = document.getElementById(gamemovedata[i+1]);
+
+                x.innerText='o';
+              }
+              i=i+2;
+            },800);
+            
+            
+            
+            
+            setTimeout(function(){
+                i=i+1;
+            var state="",luckyplayer="";
+            for(;gamemovedata[i]!='&';i++)
+            {
+              state+=gamemovedata[i];
+            }
+            i=i+1;
+            for(;gamemovedata[i];i++)
+            {
+              luckyplayer+=gamemovedata[i];
+            }
+            console.log(state+" "+luckyplayer);
+            if(state=="win")
+            {
+              
+                $message.val(luckyplayer+" won");
+              
+            }
+            else
+            {
+                $message.val("draw");
+            }
+            },l*400+200);
+  }
+  function clearbox(number)
+  {
+    document.getElementById(number).innerText="";
+  }
+  function backbuttonfun()
+  {
+    if(y==1)
+    {
+    socket.emit('view pastgames',{user:name});
+      location.href="http://localhost:2001/pastgame?"+name+"&"+1+"";
+    }
+    if(y==2)
+    {
+      socket.emit('view allgames',{});
+      location.href="http://localhost:2001/pastgame?"+name+"&"+2+"";
+    }
+  }
+</script>
+</body>
+</html>

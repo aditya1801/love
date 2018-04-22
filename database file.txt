@@ -1,0 +1,46 @@
+	
+CREATE TABLE `admintable` (
+ `username` varchar(225) NOT NULL,
+ `rating` int(11) NOT NULL DEFAULT '1000',
+ `status` varchar(225) NOT NULL DEFAULT 'offline',
+ `permission` varchar(225) NOT NULL DEFAULT 'allowed'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `friendtable` (
+ `username1` varchar(225) NOT NULL,
+ `username2` varchar(225) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `multiplayerrecords` (
+ `username` varchar(225) NOT NULL,
+ `rating` int(11) NOT NULL DEFAULT '1000',
+ `no_of_wins` int(11) NOT NULL DEFAULT '0',
+ `no_of_loses` int(11) NOT NULL DEFAULT '0',
+ `no_of_draws` int(11) NOT NULL DEFAULT '0',
+ `max_winning_streak` int(11) NOT NULL DEFAULT '0',
+ `max_losing_streak` int(11) NOT NULL DEFAULT '0',
+ `max_drawing_streak` int(11) NOT NULL DEFAULT '0',
+ `cur_winning_streak` int(11) DEFAULT '0',
+ `cur_losing_streak` int(11) DEFAULT '0',
+ `cur_drawing_streak` int(11) NOT NULL DEFAULT '0',
+ `lastrecord` int(11) NOT NULL DEFAULT '-1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `pastgames` (
+ `realusername` varchar(225) NOT NULL,
+ `username1` varchar(225) NOT NULL,
+ `username2` varchar(225) NOT NULL,
+ `status` varchar(225) NOT NULL,
+ `time` varchar(225) NOT NULL,
+ `recordgame` varchar(225) NOT NULL,
+ `firstturn` varchar(225) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+	
+CREATE TABLE `player` (
+ `username` varchar(64) NOT NULL,
+ `email` varchar(128) NOT NULL,
+ `password` varchar(64) NOT NULL,
+ `rating` int(11) DEFAULT '100',
+ `adminstatus` varchar(225) NOT NULL DEFAULT 'no'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
